@@ -1,9 +1,9 @@
 #!/bin/bash
-if [[ $UID -eq 0 ]];
-then
-  echo "do not run as root!"
-  exit 1;
-fi
+#if [[ $UID -eq 0 ]];
+#then
+#  echo "do not run as root!"
+#  exit 1;
+#fi
 
 numproc=$(grep ^processor /proc/cpuinfo  | wc -l)
 
@@ -136,7 +136,7 @@ then
 			if [[ "$1" == "importconfig" ]];
 			then
 				echo "mounting tmpfs for building..."
-				sudo mount -t tmpfs -o size=$ramdisksize none $builddir
+				mount -t tmpfs -o size=$ramdisksize none $builddir
 			fi
 		fi
 	fi
@@ -159,7 +159,7 @@ function edit()
 			$EDITOR "$file"
 		else
 			echo "file $file not writable by user using sudo..."
-			sudo $EDITOR "$file"
+			$EDITOR "$file"
 		fi
 	else
 		echo "file $file not found"
@@ -432,11 +432,11 @@ function install
 		if [[ -d "$kerneldir" ]];then
 			if [[ -e "$kernelfile" ]];then
 				echo "backup of kernel: $kernelfile.bak"
-				sudo cp "$kernelfile" "$kernelfile.bak"
+				cp "$kernelfile" "$kernelfile.bak"
 			fi
 			echo "installing new kernel..."
-			sudo cp ./uImage "$kernelfile"
-			sudo make modules_install
+			cp ./uImage "$kernelfile"
+			make modules_install
 		else
 			echo "Kernel directory not found...is /boot mounted?"
 		fi
@@ -536,7 +536,7 @@ function install
 				echo "copy modules (root needed because of ext-fs permission)"
 				export INSTALL_MOD_PATH=/media/$USER/BPI-ROOT/;
 				echo "INSTALL_MOD_PATH: $INSTALL_MOD_PATH"
-				sudo make ARCH=$ARCH INSTALL_MOD_PATH=$INSTALL_MOD_PATH KBUILD_OUTPUT=$KBUILD_OUTPUT modules_install
+				make ARCH=$ARCH INSTALL_MOD_PATH=$INSTALL_MOD_PATH KBUILD_OUTPUT=$KBUILD_OUTPUT modules_install
 
 				echo "uImage:"
 				if [[ "$itbinput" == "y" ]];then
@@ -556,13 +556,13 @@ function install
 				CRYPTODEV="utils/cryptodev/cryptodev-linux/cryptodev.ko"
 				if [ -e "${CRYPTODEV}" ]; then
 					echo Copy CryptoDev
-					sudo mkdir -p "${EXTRA_MODULE_PATH}"
-					sudo cp "${CRYPTODEV}" "${EXTRA_MODULE_PATH}"
+					mkdir -p "${EXTRA_MODULE_PATH}"
+					cp "${CRYPTODEV}" "${EXTRA_MODULE_PATH}"
 					#Build Module Dependencies
-					sudo /sbin/depmod -b $INSTALL_MOD_PATH ${kernelname}
+					/sbin/depmod -b $INSTALL_MOD_PATH ${kernelname}
 				fi
 
-				#sudo cp -r ../mod/lib/modules /media/$USER/BPI-ROOT/lib/
+				#cp -r ../mod/lib/modules /media/$USER/BPI-ROOT/lib/
 				if [[ -n "$(grep 'CONFIG_MT76=' $DOTCONFIG)" ]];then
 					echo "MT76 set,don't forget the firmware-files...";
 				fi
@@ -685,7 +685,7 @@ function deb {
 	mkdir -p $targetdir/lib/modules/
 	mkdir -p $targetdir/DEBIAN/
 
-	#sudo mount --bind ../SD/BPI-ROOT/lib/modules debian/bananapi-r2-image/lib/modules/
+	#mount --bind ../SD/BPI-ROOT/lib/modules debian/bananapi-r2-image/lib/modules/
 	if [[ -e ./uImage || -e ./uImage_nodt ]] && [[ -d ../SD/BPI-ROOT/lib/modules/${ver} ]]; then
 	if [[ -e ./uImage ]];then
 		cp ./uImage $targetdir/boot/bananapi/$board/linux/${uimagename}
